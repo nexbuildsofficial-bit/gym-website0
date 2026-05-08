@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/Navbar';
+import { FloatingGymElements } from '@/components/FloatingGymElements';
 import { Footer } from '@/components/Footer';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
@@ -27,6 +28,7 @@ export default function ServicesPage() {
   return (
     <main className="relative bg-[#080808] text-[#F5F5F0] min-h-screen selection:bg-[#CCFF00] selection:text-black">
       <Navbar />
+      <FloatingGymElements />
       
       <section className="pt-24 pb-12 md:pt-40 md:pb-32 px-4 sm:px-6 md:px-12 flex flex-col items-center justify-center relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#CCFF00]/5 rounded-full blur-[120px] pointer-events-none" aria-hidden="true"></div>

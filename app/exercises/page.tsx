@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/Navbar';
+import { FloatingGymElements } from '@/components/FloatingGymElements';
 import { Footer } from '@/components/Footer';
 import { CTA } from '@/components/CTA';
 import type { Metadata } from 'next';
@@ -15,6 +16,7 @@ export default function ExercisesPage() {
   return (
     <main className="relative bg-[#080808] text-[#F5F5F0] min-h-screen selection:bg-[#CCFF00] selection:text-black">
       <Navbar />
+      <FloatingGymElements />
       
       <section className="pt-24 pb-10 md:pt-40 md:pb-20 px-4 sm:px-6 md:px-12 text-center max-w-4xl mx-auto">
         <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 uppercase">
