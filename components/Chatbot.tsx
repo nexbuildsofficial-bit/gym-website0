@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BotMessageSquare, X, Send, User, Bot } from 'lucide-react';
+import { MessageSquareText, X, SendHorizonal, Dumbbell, Zap, Sparkles, CircleUserRound, PartyPopper } from 'lucide-react';
 
 interface Message { role: 'bot' | 'user'; text: string; options?: string[]; }
 interface FormState { step: 'idle' | 'name' | 'email' | 'phone' | 'goal' | 'done'; name: string; email: string; phone: string; goal: string; }
@@ -22,6 +22,14 @@ const KB: Record<string, string> = {
   tips: "💡 Quick fitness tips:\n• Always warm up 5-10 mins before lifting\n• Protein intake: aim for 1.6-2.2g per kg of body weight\n• Sleep 7-9 hours for optimal recovery\n• Progressive overload is key to muscle growth\n• Stay hydrated — drink 3-4L of water daily",
   nutrition: "🥗 Nutrition basics:\n• Eat protein with every meal (chicken, eggs, paneer, whey)\n• Complex carbs before workout (oats, rice, sweet potato)\n• Healthy fats: nuts, avocado, olive oil\n• Post-workout: protein shake within 30 mins\n• Our Elite plan includes a custom nutrition plan!",
   beginner: "🏋️ Beginner tips:\n• Start with compound movements (squat, bench, deadlift)\n• Focus on form over weight\n• Train 3-4 days/week with rest days\n• Our Base Package (₹2,999/mo) is perfect for beginners with 1 free PT session included!",
+  supplements: "💊 Supplement guidance:\n• **Whey Protein** — Post-workout recovery (1 scoop within 30 min)\n• **Creatine** — 5g daily for strength & power\n• **BCAA** — During workouts for endurance\n• **Multivitamin** — Daily for overall health\n• **Fish Oil** — Joint health & recovery\n\n⚠️ Always consult a doctor before starting supplements!",
+  recovery: "🧊 Recovery protocols:\n• **Foam Rolling** — 10 min post-workout to reduce soreness\n• **Cold Plunge** — 3-5 min at 10°C (available for Pro & Elite)\n• **Sauna** — 15-20 min for muscle relaxation\n• **Sleep** — 7-9 hours minimum\n• **Active Recovery** — Light walking or yoga on rest days\n• **Sports Massage** — Available for all members (₹1,500/session)",
+  splits: "📋 Popular workout splits:\n\n**Push/Pull/Legs (6 days)**\n• Push: Chest, shoulders, triceps\n• Pull: Back, biceps, rear delts\n• Legs: Quads, hamstrings, glutes, calves\n\n**Upper/Lower (4 days)**\n• Great for intermediates\n\n**Bro Split (5 days)**\n• One body part per day\n\nOur trainers can help customize your ideal split!",
+  pt: "🎯 Personal Training details:\n• **Base Members** — 1 free PT session/month\n• **Pro Members** — Can book PT at ₹1,200/session\n• **Elite Members** — 3 PT sessions/week included!\n\nAll trainers are certified with 5+ years experience. Sessions are 60 min and include form correction, progressive programming & accountability tracking.",
+  women: "👩 Women's fitness at FiTusion:\n• Dedicated women's training zone available\n• Female certified trainers on staff\n• Programs: Strength, Toning, HIIT, Yoga, Pilates\n• Safe, supportive, judgment-free environment\n• Body composition tracking with InBody scans\n• Prenatal & postnatal fitness programs available",
+  stretching: "🧘 Stretching & Mobility:\n• **Dynamic stretching** before workouts (leg swings, arm circles)\n• **Static stretching** after workouts (hold 20-30 sec)\n• **Mobility work** — Hip openers, thoracic spine, ankle mobility\n• We offer dedicated **Mobility & Recovery** classes!\n• Foam rollers, resistance bands & yoga mats available free",
+  bmi: "📊 BMI & Body Composition:\n• **Underweight**: BMI < 18.5\n• **Normal**: BMI 18.5-24.9\n• **Overweight**: BMI 25-29.9\n• **Obese**: BMI > 30\n\n💡 BMI isn't everything! We use **InBody scans** for accurate body fat %, muscle mass, and water retention analysis. Weekly scans included in Pro & Elite plans!",
+  parking: "🚗 Parking & Access:\n• Free valet parking for all members\n• Secure bike parking available\n• Located near Phase 4 Metro Station (5 min walk)\n• Elevator access to all floors\n• Wheelchair accessible facility",
 };
 
 const KEYWORDS: [string[], string][] = [
@@ -31,15 +39,23 @@ const KEYWORDS: [string[], string][] = [
   [['where', 'location', 'address', 'direction', 'map', 'find you', 'situated'], 'location'],
   [['contact', 'call', 'phone', 'email', 'reach', 'whatsapp', 'number'], 'contact'],
   [['trainer', 'coach', 'instructor', 'staff', 'team'], 'trainers'],
-  [['feature', 'facility', 'amenity', 'equipment', 'shower', 'locker', 'sauna', 'towel', 'parking'], 'features'],
+  [['feature', 'facility', 'amenity', 'equipment', 'shower', 'locker', 'sauna', 'towel'], 'features'],
   [['service', 'program', 'class', 'cardio', 'strength', 'hiit', 'kettlebell', 'barbell', 'yoga'], 'services'],
-  [['exercise', 'workout', 'deadlift', 'hypertrophy', 'calisthenics', 'olympic', 'mobility'], 'exercises'],
+  [['exercise', 'workout', 'deadlift', 'hypertrophy', 'calisthenics', 'olympic'], 'exercises'],
   [['freeze', 'pause', 'hold', 'suspend'], 'freeze'],
-  [['cancel', 'stop', 'quit', 'leave', 'end'], 'cancel'],
+  [['cancel', 'stop', 'quit', 'leave', 'end membership'], 'cancel'],
   [['day pass', 'trial', 'one day', 'single day', 'try'], 'daypass'],
   [['tip', 'advice', 'suggest', 'recommend', 'help me'], 'tips'],
   [['nutrition', 'diet', 'food', 'eat', 'protein', 'meal', 'calorie'], 'nutrition'],
-  [['beginner', 'start', 'new', 'first time', 'never been', 'newbie'], 'beginner'],
+  [['beginner', 'start', 'first time', 'never been', 'newbie'], 'beginner'],
+  [['supplement', 'creatine', 'whey', 'bcaa', 'vitamin', 'fish oil'], 'supplements'],
+  [['recovery', 'rest', 'sore', 'soreness', 'foam roll', 'cold plunge', 'ice bath'], 'recovery'],
+  [['split', 'routine', 'schedule', 'push pull', 'ppl', 'upper lower', 'bro split'], 'splits'],
+  [['personal train', 'pt session', 'one on one', '1 on 1', 'private session'], 'pt'],
+  [['women', 'female', 'ladies', 'girl', 'prenatal', 'postnatal'], 'women'],
+  [['stretch', 'mobility', 'flexibility', 'warm up', 'cool down', 'yoga mat'], 'stretching'],
+  [['bmi', 'body fat', 'body composition', 'inbody', 'scan', 'weight check', 'fat percent'], 'bmi'],
+  [['parking', 'valet', 'bike', 'metro', 'wheelchair', 'access'], 'parking'],
 ];
 
 function matchQuery(input: string): string | null {
@@ -50,7 +66,26 @@ function matchQuery(input: string): string | null {
   return null;
 }
 
-const QUICK_OPTIONS = ['💰 Plans & Pricing', '🏋️ Services', '🏢 Features', '📍 Location & Hours', '💡 Fitness Tips', '📝 Register / Enquiry'];
+const QUICK_OPTIONS = ['💰 Plans & Pricing', '🏋️ Services', '🏢 Features', '📍 Location & Hours', '💡 Fitness Tips', '💊 Supplements', '🧊 Recovery', '📋 Workout Splits', '📝 Register / Enquiry'];
+
+// Confetti particle component
+function ConfettiParticle({ delay, x, color }: { delay: number; x: number; color: string }) {
+  return (
+    <motion.div
+      className="absolute w-2 h-2 rounded-sm"
+      style={{ backgroundColor: color, left: `${x}%`, top: '50%' }}
+      initial={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
+      animate={{
+        opacity: [1, 1, 0],
+        y: [0, -80 - Math.random() * 60, -120 - Math.random() * 40],
+        x: [(Math.random() - 0.5) * 100, (Math.random() - 0.5) * 160],
+        scale: [1, 1.2, 0.4],
+        rotate: [0, Math.random() * 360, Math.random() * 720],
+      }}
+      transition={{ duration: 1.4, delay, ease: 'easeOut' }}
+    />
+  );
+}
 
 export function Chatbot() {
   const [open, setOpen] = useState(false);
@@ -60,16 +95,22 @@ export function Chatbot() {
   const [input, setInput] = useState('');
   const [formState, setFormState] = useState<FormState>({ step: 'idle', name: '', email: '', phone: '', goal: '' });
   const [typing, setTyping] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [sendAnim, setSendAnim] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, typing]);
 
-  const addBot = useCallback((text: string, options?: string[]) => {
+  const addBot = useCallback((text: string, options?: string[], celebrate?: boolean) => {
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
       setMessages(prev => [...prev, { role: 'bot', text, options }]);
+      if (celebrate) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 2000);
+      }
     }, 600);
   }, []);
 
@@ -78,17 +119,17 @@ export function Chatbot() {
     const s = formState;
     if (s.step === 'name') {
       setFormState(prev => ({ ...prev, name: userText, step: 'email' }));
-      addBot("Great! Now, what's your **email address**?");
+      addBot("Great! Now, what's your **email address**? 📧");
     } else if (s.step === 'email') {
       if (!userText.includes('@')) { addBot("That doesn't look like a valid email. Please try again."); return; }
       setFormState(prev => ({ ...prev, email: userText, step: 'phone' }));
-      addBot("And your **phone number**?");
+      addBot("And your **phone number**? 📱");
     } else if (s.step === 'phone') {
       setFormState(prev => ({ ...prev, phone: userText, step: 'goal' }));
-      addBot("Last one! What's your **fitness goal**? (e.g., Muscle Building, Fat Loss, General Fitness, Strength)");
+      addBot("Last one! What's your **fitness goal**? (e.g., Muscle Building, Fat Loss, General Fitness, Strength) 🎯");
     } else if (s.step === 'goal') {
       setFormState(prev => ({ ...prev, goal: userText, step: 'done' }));
-      addBot(`✅ **Registration complete!**\n\n📋 Here's what we got:\n• Name: ${s.name}\n• Email: ${s.email}\n• Phone: ${s.phone}\n• Goal: ${userText}\n\nOur team will reach out to you within 24 hours! 🎉\n\nAnything else I can help with?`, QUICK_OPTIONS);
+      addBot(`🎉 **Registration complete!**\n\n📋 Here's what we got:\n• Name: ${s.name}\n• Email: ${s.email}\n• Phone: ${s.phone}\n• Goal: ${userText}\n\nOur team will reach out to you within 24 hours! Welcome to FiTusion! 💪`, QUICK_OPTIONS, true);
       setFormState({ step: 'idle', name: '', email: '', phone: '', goal: '' });
     }
   }, [formState, addBot]);
@@ -98,11 +139,15 @@ export function Chatbot() {
     if (!msg) return;
     setInput('');
 
+    // Trigger send animation
+    setSendAnim(true);
+    setTimeout(() => setSendAnim(false), 400);
+
     if (formState.step !== 'idle') { handleFormStep(msg); return; }
 
     setMessages(prev => [...prev, { role: 'user', text: msg }]);
 
-    const clean = msg.replace(/[💰🏋️🏢📍💡📝]/g, '').trim().toLowerCase();
+    const clean = msg.replace(/[💰🏋️🏢📍💡📝💊🧊📋]/g, '').trim().toLowerCase();
 
     if (clean.includes('register') || clean.includes('enquiry') || clean.includes('sign up') || clean.includes('enroll') || clean.includes('form')) {
       setFormState(prev => ({ ...prev, step: 'name' }));
@@ -118,7 +163,7 @@ export function Chatbot() {
     } else if (clean.includes('hi') || clean.includes('hello') || clean.includes('hey')) {
       addBot("Hey! 👋 Welcome to FiTusion! What would you like to know?", QUICK_OPTIONS);
     } else {
-      addBot("I'm not sure about that, but I can help with:\n• Plans & pricing\n• Services & programs\n• Gym features & amenities\n• Location & hours\n• Fitness tips & nutrition\n• Registration\n\nTry asking about any of these! 😊", QUICK_OPTIONS);
+      addBot("I'm not sure about that, but I can help with:\n• Plans & pricing\n• Services & programs\n• Gym features & amenities\n• Location & hours\n• Fitness tips & nutrition\n• Supplements & recovery\n• Workout splits & routines\n• Registration\n\nTry asking about any of these! 😊", QUICK_OPTIONS);
     }
   }, [input, formState, handleFormStep, addBot]);
 
@@ -135,15 +180,17 @@ export function Chatbot() {
     ));
   };
 
+  const confettiColors = ['#CCFF00', '#FFD700', '#FF6B6B', '#4ECDC4', '#A78BFA', '#F472B6', '#34D399'];
+
   return (
     <>
       {/* Toggle Button */}
-      <div className="fixed right-0 top-[calc(50%-30px)] -translate-y-1/2 z-[9999]">
+      <div className="fixed right-0 top-[calc(50%-30px)] -translate-y-1/2 z-[9999] max-lg:top-auto max-lg:bottom-[100px] max-lg:translate-y-0">
         <motion.button
           onClick={() => { setOpen(!open); setTimeout(() => inputRef.current?.focus(), 300); }}
           whileHover={{ x: -4 }}
           whileTap={{ scale: 0.95 }}
-          className={`relative w-12 h-12 bg-[#111] border-y border-l border-white/10 hover:border-[#CCFF00] rounded-l-xl flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-colors overflow-hidden ${open ? 'border-[#CCFF00] text-[#CCFF00]' : 'text-white hover:text-[#CCFF00]'}`}
+          className={`relative w-10 h-10 lg:w-12 lg:h-12 bg-[#111] border-y border-l border-white/10 hover:border-[#CCFF00] rounded-l-xl flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-colors overflow-hidden ${open ? 'border-[#CCFF00] text-[#CCFF00]' : 'text-white hover:text-[#CCFF00]'}`}
           aria-label={open ? 'Close chat' : 'Open chat'}
         >
           <AnimatePresence mode="wait">
@@ -153,7 +200,7 @@ export function Chatbot() {
               </motion.div>
             ) : (
               <motion.div key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                <BotMessageSquare size={20} strokeWidth={2} />
+                <MessageSquareText size={20} strokeWidth={2} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -175,15 +222,46 @@ export function Chatbot() {
             animate={{ opacity: 1, scale: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.9, x: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-1/2 -translate-y-1/2 right-[70px] z-[9999] w-[360px] max-w-[calc(100vw-80px)] h-[600px] max-h-[calc(100vh-40px)] rounded-[24px] bg-[#0A0A0A] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden origin-right"
+            className="fixed top-1/2 -translate-y-1/2 right-[70px] z-[9999] w-[360px] max-w-[calc(100vw-80px)] h-[600px] max-h-[calc(100vh-40px)] rounded-[24px] bg-[#0A0A0A] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden origin-right max-lg:w-[280px] max-lg:h-[420px] max-lg:right-[56px] max-lg:top-auto max-lg:bottom-[60px] max-lg:translate-y-0 max-lg:origin-bottom-right max-lg:rounded-[18px]"
           >
+            {/* Confetti overlay */}
+            <AnimatePresence>
+              {showConfetti && (
+                <motion.div
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-50 pointer-events-none overflow-hidden"
+                >
+                  {Array.from({ length: 28 }).map((_, i) => (
+                    <ConfettiParticle
+                      key={i}
+                      delay={Math.random() * 0.3}
+                      x={Math.random() * 100}
+                      color={confettiColors[i % confettiColors.length]}
+                    />
+                  ))}
+                  {/* Center celebration icon */}
+                  <motion.div
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: [0, 1.4, 1], rotate: [-30, 10, 0] }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                  >
+                    <PartyPopper size={48} className="text-[#CCFF00] drop-shadow-[0_0_20px_rgba(204,255,0,0.6)]" />
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Header */}
             <div className="px-5 py-4 bg-gradient-to-r from-[#111] to-[#0A0A0A] border-b border-white/10 flex items-center gap-3 flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-[#CCFF00] flex items-center justify-center">
-                <Bot size={20} className="text-black" />
+              <div className="w-10 h-10 rounded-full bg-[#CCFF00] flex items-center justify-center shadow-[0_0_12px_rgba(204,255,0,0.3)]">
+                <Zap size={20} className="text-black" fill="black" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm">FitBot</h3>
+                <h3 className="text-white font-bold text-sm flex items-center gap-1.5">
+                  FitBot <Sparkles size={12} className="text-[#CCFF00]" />
+                </h3>
                 <p className="text-[#CCFF00] text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#CCFF00] animate-pulse" /> Online
                 </p>
@@ -193,10 +271,16 @@ export function Chatbot() {
             {/* Messages */}
             <div data-lenis-prevent="true" className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-thin scrollbar-thumb-white/10 overscroll-contain">
               {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
                   {msg.role === 'bot' && (
-                    <div className="w-7 h-7 rounded-full bg-[#CCFF00]/20 flex items-center justify-center flex-shrink-0 mt-1">
-                      <Bot size={14} className="text-[#CCFF00]" />
+                    <div className="w-7 h-7 rounded-full bg-[#CCFF00]/20 flex items-center justify-center flex-shrink-0 mt-1 border border-[#CCFF00]/10">
+                      <Dumbbell size={13} className="text-[#CCFF00]" />
                     </div>
                   )}
                   <div className={`max-w-[80%] ${msg.role === 'user' ? 'order-first' : ''}`}>
@@ -210,28 +294,30 @@ export function Chatbot() {
                     {msg.options && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {msg.options.map(opt => (
-                          <button
+                          <motion.button
                             key={opt}
+                            whileHover={{ scale: 1.04 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={() => handleSend(opt)}
                             className="px-3 py-1.5 rounded-full text-[11px] font-bold bg-white/5 text-white/70 border border-white/10 hover:bg-[#CCFF00]/10 hover:border-[#CCFF00]/30 hover:text-[#CCFF00] transition-all"
                           >
                             {opt}
-                          </button>
+                          </motion.button>
                         ))}
                       </div>
                     )}
                   </div>
                   {msg.role === 'user' && (
-                    <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-1">
-                      <User size={14} className="text-white/60" />
+                    <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-1 border border-white/5">
+                      <CircleUserRound size={14} className="text-white/60" />
                     </div>
                   )}
-                </div>
+                </motion.div>
               ))}
               {typing && (
                 <div className="flex gap-2 items-center">
-                  <div className="w-7 h-7 rounded-full bg-[#CCFF00]/20 flex items-center justify-center flex-shrink-0">
-                    <Bot size={14} className="text-[#CCFF00]" />
+                  <div className="w-7 h-7 rounded-full bg-[#CCFF00]/20 flex items-center justify-center flex-shrink-0 border border-[#CCFF00]/10">
+                    <Dumbbell size={13} className="text-[#CCFF00]" />
                   </div>
                   <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl rounded-bl-md px-4 py-3 flex gap-1">
                     <span className="w-2 h-2 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -258,9 +344,11 @@ export function Chatbot() {
                   onClick={() => handleSend()}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 rounded-full bg-[#CCFF00] flex items-center justify-center text-black flex-shrink-0"
+                  animate={sendAnim ? { rotate: [0, -20, 0], scale: [1, 1.2, 1] } : {}}
+                  transition={{ duration: 0.35 }}
+                  className="w-10 h-10 rounded-full bg-[#CCFF00] flex items-center justify-center text-black flex-shrink-0 shadow-[0_0_10px_rgba(204,255,0,0.2)]"
                 >
-                  <Send size={16} />
+                  <SendHorizonal size={16} />
                 </motion.button>
               </div>
             </div>

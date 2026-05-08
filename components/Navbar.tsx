@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useCallback, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Menu, X, ChevronRight, Dumbbell } from 'lucide-react';
 
@@ -18,6 +19,7 @@ export function Navbar() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileHovered, setMobileHovered] = useState<number | null>(null);
+  const pathname = usePathname();
 
   const handleMouseEnter = useCallback((i: number) => setHoveredIndex(i), []);
   const handleMouseLeave = useCallback(() => setHoveredIndex(null), []);
@@ -37,7 +39,7 @@ export function Navbar() {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-4 md:px-8 md:py-6 bg-transparent"
+        className="fixed top-0 left-0 w-full z-[10002] flex items-center justify-between px-4 py-4 md:px-8 md:py-6 bg-transparent"
         role="navigation"
         aria-label="Main navigation"
       >
@@ -50,31 +52,51 @@ export function Navbar() {
           <span className="text-xl font-bold text-[#F5F5F0]">FiTusion</span>
         </Link>
 
-        {/* Desktop nav links — hidden on mobile */}
+        {/* Desktop nav links — no container border, just floating links with sliding pill */}
         <div className="hidden lg:flex gap-8 items-center z-50" role="menubar">
-          {navLinks.map((link, i) => (
-            <Link
-              href={link.href}
-              key={link.label}
-              className="relative text-sm font-medium text-gray-400 transition-colors hover:text-[#F5F5F0]"
-              onMouseEnter={() => handleMouseEnter(i)}
-              onMouseLeave={handleMouseLeave}
-              role="menuitem"
-            >
-              {link.label}
-              {hoveredIndex === i && (
-                <motion.div
-                  layoutId="navIndicator"
-                  className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#CCFF00]"
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  aria-hidden="true"
-                />
-              )}
-            </Link>
-          ))}
+          {navLinks.map((link, i) => {
+            const isActive = pathname === link.href;
+            const isHovered = hoveredIndex === i;
+            return (
+              <Link
+                href={link.href}
+                key={link.label}
+                className={`relative px-4 py-2 text-sm font-semibold transition-colors duration-200 z-10 ${isActive ? 'text-black' : 'text-gray-400 hover:text-white'}`}
+                onMouseEnter={() => handleMouseEnter(i)}
+                onMouseLeave={handleMouseLeave}
+                role="menuitem"
+              >
+                <span className="relative z-10">{link.label}</span>
+                {/* Active sliding pill — smooth spring animation between pages */}
+                {isActive && (
+                  <motion.div
+                    layoutId="navPillIndicator"
+                    className="absolute inset-0 bg-[#CCFF00] rounded-xl -z-10 shadow-[0_0_15px_rgba(204,255,0,0.4)]"
+                    initial={false}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 380,
+                      damping: 32,
+                      mass: 0.8,
+                    }}
+                    aria-hidden="true"
+                  />
+                )}
+                {/* Hover ghost pill */}
+                {isHovered && !isActive && (
+                  <motion.div
+                    layoutId="navHoverGhost"
+                    className="absolute inset-0 bg-white/10 rounded-xl -z-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    aria-hidden="true"
+                  />
+                )}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Desktop CTAs + Mobile hamburger */}
@@ -139,7 +161,7 @@ export function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-0 z-40 bg-black/80 lg:hidden"
+              className="fixed inset-0 z-[10000] bg-black/70 backdrop-blur-md lg:hidden"
               onClick={closeMobile}
               aria-hidden="true"
             />
@@ -151,7 +173,7 @@ export function Navbar() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               style={{ willChange: 'transform, opacity' }}
-              className="fixed top-[72px] left-3 right-3 z-50 lg:hidden shadow-[0_24px_80px_-12px_rgba(0,0,0,0.9),0_0_40px_rgba(204,255,0,0.04)]"
+              className="fixed top-[72px] left-3 right-3 z-[10001] lg:hidden shadow-[0_24px_80px_-12px_rgba(0,0,0,0.9),0_0_40px_rgba(204,255,0,0.04)]"
             >
               {/* Glass background layers */}
               <div className="relative bg-[#080808]/80 supports-[backdrop-filter]:bg-[#111111]/40 supports-[backdrop-filter]:backdrop-blur-2xl border border-white/[0.08] overflow-hidden rounded-[28px] transform-gpu">

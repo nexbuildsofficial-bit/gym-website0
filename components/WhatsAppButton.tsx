@@ -9,7 +9,7 @@ export function WhatsAppButton() {
   const message = encodeURIComponent('Hi! I\'m interested in FiTusion gym membership. Can you share more details?');
 
   return (
-    <div className="fixed right-0 top-[calc(50%+30px)] -translate-y-1/2 z-[9998]">
+    <div className="fixed right-0 top-[calc(50%+30px)] -translate-y-1/2 z-[9998] max-lg:top-auto max-lg:bottom-[50px] max-lg:translate-y-0">
       <a
         href={`https://wa.me/${phone}?text=${message}`}
         target="_blank"

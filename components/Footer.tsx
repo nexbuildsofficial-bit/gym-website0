@@ -4,7 +4,7 @@ import { Facebook, Linkedin, Instagram } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="w-full bg-gradient-to-t from-[#CCFF00]/5 to-transparent pt-16 md:pt-32 pb-8 md:pb-12 border-t border-white/5 relative z-10" role="contentinfo">
+    <footer className="w-full bg-[#080808] pt-16 md:pt-32 pb-8 md:pb-12 border-t border-white/5 relative z-10" role="contentinfo">
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-12 flex flex-col md:flex-row justify-between gap-8 md:gap-12 lg:gap-16 items-center md:items-start text-center md:text-left">
         
         <div className="max-w-[280px] flex flex-col items-center md:items-start">

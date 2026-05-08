@@ -1,5 +1,4 @@
 import { Navbar } from '@/components/Navbar';
-import { FloatingGymElements } from '@/components/FloatingGymElements';
 import { Footer } from '@/components/Footer';
 import { CTA } from '@/components/CTA';
 import Image from 'next/image';
@@ -19,7 +18,6 @@ export default function AboutPage() {
   return (
     <main className="relative bg-[#080808] text-[#F5F5F0] min-h-screen selection:bg-[#CCFF00] selection:text-black">
       <Navbar />
-      <FloatingGymElements />
       
       {/* Hero Section for About */}
       <section className="relative w-full pt-24 pb-12 md:pt-48 md:pb-32 px-4 sm:px-6 md:px-12 flex items-center justify-center overflow-hidden">

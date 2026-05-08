@@ -1,5 +1,4 @@
 import { Navbar } from '@/components/Navbar';
-import { FloatingGymElements } from '@/components/FloatingGymElements';
 import { Footer } from '@/components/Footer';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
@@ -15,7 +14,6 @@ export default function ContactPage() {
   return (
     <main className="relative bg-[#080808] text-[#F5F5F0] min-h-screen selection:bg-[#CCFF00] selection:text-black">
       <Navbar />
-      <FloatingGymElements />
       <ContactForm />
       <Footer />
     </main>
