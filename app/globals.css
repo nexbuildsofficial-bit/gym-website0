@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Reduce layout shift by setting default sizing */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Prevent FOUC (Flash of Unstyled Content) */
+body {
+  text-rendering: optimizeSpeed;
+}
+
+/* Improve CLS: reserve space for images */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Focus visible for keyboard navigation (Accessibility) */
+:focus-visible {
+  outline: 2px solid #CCFF00;
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it (Accessibility + Performance) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Smooth scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #CCFF00;
+}
+
+/* Selection styling */
+::selection {
+  background-color: #CCFF00;
+  color: #000;
+}
