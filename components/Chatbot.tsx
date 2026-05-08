@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, X, Send, User, Bot, ArrowRight } from 'lucide-react';
+import { BotMessageSquare, X, Send, User, Bot } from 'lucide-react';
 
 interface Message { role: 'bot' | 'user'; text: string; options?: string[]; }
 interface FormState { step: 'idle' | 'name' | 'email' | 'phone' | 'goal' | 'done'; name: string; email: string; phone: string; goal: string; }
@@ -138,42 +138,44 @@ export function Chatbot() {
   return (
     <>
       {/* Toggle Button */}
-      <motion.button
-        onClick={() => { setOpen(!open); setTimeout(() => inputRef.current?.focus(), 300); }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full bg-[#CCFF00] text-black flex items-center justify-center shadow-[0_4px_20px_rgba(204,255,0,0.4)] hover:shadow-[0_4px_30px_rgba(204,255,0,0.6)] transition-shadow"
-        aria-label={open ? 'Close chat' : 'Open chat'}
-      >
-        <AnimatePresence mode="wait">
-          {open ? (
-            <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-              <X size={24} strokeWidth={3} />
-            </motion.div>
-          ) : (
-            <motion.div key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-              <MessageCircle size={24} strokeWidth={2.5} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+      <div className="fixed right-0 top-[calc(50%-30px)] -translate-y-1/2 z-[9999]">
+        <motion.button
+          onClick={() => { setOpen(!open); setTimeout(() => inputRef.current?.focus(), 300); }}
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
+          className={`relative w-12 h-12 bg-[#111] border-y border-l border-white/10 hover:border-[#CCFF00] rounded-l-xl flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-colors overflow-hidden ${open ? 'border-[#CCFF00] text-[#CCFF00]' : 'text-white hover:text-[#CCFF00]'}`}
+          aria-label={open ? 'Close chat' : 'Open chat'}
+        >
+          <AnimatePresence mode="wait">
+            {open ? (
+              <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <X size={20} strokeWidth={2.5} />
+              </motion.div>
+            ) : (
+              <motion.div key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <BotMessageSquare size={20} strokeWidth={2} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
 
-      {/* Notification dot */}
-      {!open && (
-        <div className="fixed bottom-[72px] right-6 z-[9999] pointer-events-none">
-          <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-        </div>
-      )}
+        {/* Notification dot */}
+        {!open && (
+          <div className="absolute -top-1 -left-1 pointer-events-none">
+            <div className="w-3 h-3 rounded-full bg-[#CCFF00] animate-pulse shadow-[0_0_10px_rgba(204,255,0,0.8)]" />
+          </div>
+        )}
+      </div>
 
       {/* Chat Window */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.9, x: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.9, x: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-24 right-6 z-[9999] w-[360px] max-w-[calc(100vw-48px)] h-[520px] max-h-[calc(100vh-120px)] rounded-[24px] bg-[#0A0A0A] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden"
+            className="fixed top-1/2 -translate-y-1/2 right-[70px] z-[9999] w-[360px] max-w-[calc(100vw-80px)] h-[600px] max-h-[calc(100vh-40px)] rounded-[24px] bg-[#0A0A0A] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden origin-right"
           >
             {/* Header */}
             <div className="px-5 py-4 bg-gradient-to-r from-[#111] to-[#0A0A0A] border-b border-white/10 flex items-center gap-3 flex-shrink-0">
@@ -189,7 +191,7 @@ export function Chatbot() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-thin scrollbar-thumb-white/10">
+            <div data-lenis-prevent="true" className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-thin scrollbar-thumb-white/10 overscroll-contain">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'bot' && (
