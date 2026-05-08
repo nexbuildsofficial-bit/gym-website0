@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css'; // Global styles
 import { SmoothScrolling } from '@/components/SmoothScrolling';
+import { Chatbot } from '@/components/Chatbot';
+import { WhatsAppButton } from '@/components/WhatsAppButton';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -85,6 +87,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <SmoothScrolling>{children}</SmoothScrolling>
+        <Chatbot />
+        <WhatsAppButton />
       </body>
     </html>
   );
